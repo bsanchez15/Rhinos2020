@@ -50,6 +50,10 @@ public class Shooter extends PIDSubsystem {
     return 0;
   }
 
+  public double GetShooterSpeed () {
+    return encoder.getVelocity()/60;
+  }
+
   public LimeLight getlimelight(){
 return m_limelight;
 
@@ -59,5 +63,6 @@ return m_limelight;
     SmartDashboard.putBoolean("TargetFound[tv]", getlimelight().getIsTargetFound());
     SmartDashboard.putNumber("GetDegVertical[ty]", getlimelight().getdegVerticalToTarget());
     SmartDashboard.putNumber("GetDegHorizontal[tx]", getlimelight().getdegRotationToTarget());
+    SmartDashboard.putNumber(("GetShooterSpeed"), GetShooterSpeed() );
   }
 }

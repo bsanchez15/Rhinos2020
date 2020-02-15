@@ -7,22 +7,25 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.MedianFilter;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.Shooter;
+import frc.robot.Constants.DriveConstants;
+import frc.robot.limelightvision.LimeLight;
+import frc.robot.subsystems.DriveTrain;
 
-public class ShootRange extends CommandBase {
-  Shooter m_shooter;
-  MedianFilter tyfilter = new MedianFilter(5);
+public class ShootAlign extends CommandBase {
+  private static final double THRESHOLD = 0;
+double steeringadjust;
+  double threshold;
   /**
-   * Creates a new ShootRange.
+   * Creates a new ShootAlign.
    */
-  public ShootRange(Shooter S) {
-    m_shooter = S;  
-    
+  DriveTrain m_DriveTrain = new DriveTrain();
+
+  public ShootAlign(DriveTrain D) {
+m_DriveTrain = D;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(m_DriveTrain);
   }
 
   // Called when the command is initially scheduled.
@@ -33,12 +36,23 @@ public class ShootRange extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_shooter.log();
-    m_shooter.useOutput(0, OutputCalc());
-    double ty = m_shooter.getlimelight().getdegVerticalToTarget();
+    double Kp = Constants.Drive_kP;
+    double tx = m_DriveTrain.getlimelight().getdegRotationToTarget();
+    boolean isTargetSeen = m_DriveTrain.getlimelight().getIsTargetFound();
+    double error = -tx;
 
-    SmartDashboard.putNumber("Distance", DistanceCalc(ty)); 
-    SmartDashboard.putNumber("Output", OutputCalc()); 
+
+    if ((tx > 1)& isTargetSeen){
+      steeringadjust = Kp * error - threshold;
+    }
+
+    else if ((tx < 1) & isTargetSeen){
+      steeringadjust = Kp * error + threshold;
+    }
+    m_DriveTrain.tankDriveSimpleTeleop(
+      steeringadjust, 
+      -steeringadjust);
+    
   }
 
   // Called once the command ends or is interrupted.
@@ -49,22 +63,9 @@ public class ShootRange extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    if (Math.abs(m_DriveTrain.getlimelight().getdegRotationToTarget()) < THRESHOLD) {
+      return true;
+    } 
+    else return false;
   }
-  public double DistanceCalc (double a1){
-    double a2 = Constants.LL_ANGLE;
-    double h1 = Constants.INNER_HEIGHT;
-    double h2 = Constants.LL_HEIGHT;
-
-    return h1-h2/(Math.tan(a2+a1));
-
-  }
-
-  private double OutputCalc(){
-    double ty = m_shooter.getlimelight().getdegVerticalToTarget();
-
-    return Math.abs(Constants.DvsV_SecondTerm+(Constants.DvsV_FirstTerm*DistanceCalc(tyfilter.calculate(ty))));
-  }
-
-  
 }
