@@ -7,14 +7,23 @@
 
 package frc.robot.subsystems;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
-  DoubleSolenoid shifter1 = new DoubleSolenoid(Constants.Intake_Shifter1_1, Constants.Intake_Shifter1_2);
-  DoubleSolenoid shifter2 = new DoubleSolenoid(Constants.Intake_Shifter2_1, Constants.Intake_Shifter2_2);
+  private DoubleSolenoid shifter1 = new DoubleSolenoid(IntakeConstants.Intake_Shifter1_1, IntakeConstants.Intake_Shifter1_2);
+  private DoubleSolenoid shifter2 = new DoubleSolenoid(IntakeConstants.Intake_Shifter2_1, IntakeConstants.Intake_Shifter2_2);
+
+  private CANSparkMax intake1 = new CANSparkMax(IntakeConstants.Intake1_ID, MotorType.kBrushed);
+  private CANSparkMax intake2 = new CANSparkMax(IntakeConstants.Intake2_ID, MotorType.kBrushed);
+
 
 
   /**

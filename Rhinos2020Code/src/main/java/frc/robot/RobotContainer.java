@@ -9,6 +9,7 @@ package frc.robot;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -29,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.ShootAlign;
 import frc.robot.commands.ShootRange;
 import frc.robot.subsystems.DriveTrain;
@@ -58,7 +60,8 @@ public class RobotContainer {
   public RobotContainer() {
     
     m_robotDrive.setDefaultCommand(new RunCommand(()-> 
-    m_robotDrive.ArcadeDrive(controller1.getRawAxis(Constants.Controller1RightY)*.4,controller1.getRawAxis(Constants.Controller1LeftX)*.4),m_robotDrive));
+    
+    m_robotDrive.ArcadeDrive(controller1.getRawAxis(Constants.Controller1LeftY)*.4,controller1.getRawAxis(Constants.Controller1RightX)*.4),m_robotDrive));
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -85,43 +88,49 @@ public class RobotContainer {
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
-   *//*
+   */
 
   public Command getAutonomousCommand() {
     var autoVoltageConstraint = new DifferentialDriveVoltageConstraint(
         new SimpleMotorFeedforward(Constants.Drive_ksVolts,
                                   Constants.Drive_kvVoltsSecondPerMeter,
                                   Constants.Drive_kaVoltsSecondsSquaredPerMeter), 
-                                  m_robotDrive.getKinematics(), 10);
+                                  DriveConstants.kDriveKinematics, 10);
 
     TrajectoryConfig config =
     new TrajectoryConfig(Constants.DriveMaxVelocity, Constants.DriveMaxAcceleration)
-    .setKinematics(m_robotDrive.getKinematics())
+    .setKinematics(DriveConstants.kDriveKinematics)
     .addConstraint(autoVoltageConstraint);
 
-    String trajectory1Path = "paths/2pcPickup.wpilib.json";
-try {
-  Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectory1Path);
-  Trajectory trajectory1 = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
-} catch (IOException ex) {
-  DriverStation.reportError("Unable to open trajectory: " + trajectory1Path, ex.getStackTrace());
-}
+    Trajectory trajectory1 = null;
 
+    try {
+      trajectory1 = TrajectoryUtil.fromPathweaverJson(Paths.get("/home/lvuser/deploy/paths/SimpleTurn.wpilib.json"));
+    }
+    catch (IOException ioe) { 
+      DriverStation.reportError("Unable to open trajectory!", ioe.getStackTrace());
+    }
+
+    if (trajectory1 != null){
     RamseteCommand ramseteCommandFirstRoute = new RamseteCommand(
-        trajectory1Path,
+        trajectory1,
         m_robotDrive::getPose,
         new RamseteController(Constants.kRamseteB, Constants.kRamseteZeta),
         new SimpleMotorFeedforward(Constants.Drive_ksVolts,
                                    Constants.Drive_kvVoltsSecondPerMeter,
                                    Constants.kaVoltSecondsSquaredPerMeter),
-        m_robotDrive::getKinematics,
-        m_robotDrive::getWheelSpeeds,
+        DriveConstants.kDriveKinematics,
+        m_robotDrive::getSpeeds,
         new PIDController(Constants.Drive_kP, 0, 0), new PIDController(Constants.Drive_kP, 0, 0),
         // RamseteCommand passes volts to the callback
         m_robotDrive::tankDriveVolts,
         m_robotDrive
     );
-
+    return ramseteCommandFirstRoute.andThen(() -> m_robotDrive.tankDriveVolts(0, 0));
+    } else {
+      return null;
+    
+  }
     
 
 
@@ -129,5 +138,5 @@ try {
     // An ExampleCommand will run in autonomous
     
   
-  }*/
+  }
 }

@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -47,7 +48,7 @@ private CANEncoder rightEncoder = new CANEncoder(rightMaster);
 
 public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics (Units.inchesToMeters(26.75));
 
-Gyro gyro = new ADXRS450_Gyro(SPI.Port.kMXP);
+Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 
 private DifferentialDriveOdometry m_Odometry;
   /**
@@ -71,6 +72,7 @@ private DifferentialDriveOdometry m_Odometry;
 
   @Override
   public void periodic() {
+    Log();
     m_Odometry.update(Rotation2d.fromDegrees(getHeading()), leftEncoder.getPosition(), rightEncoder.getPosition());
     // This method will be called once per scheduler run
   }
@@ -85,9 +87,7 @@ private DifferentialDriveOdometry m_Odometry;
     );
   }
 
-  public DifferentialDriveKinematics getKinematics(){
-    return kDriveKinematics;
-  }
+
 
   public void resetOdometry(Pose2d pose){
     resetEncoders();
@@ -113,6 +113,8 @@ private DifferentialDriveOdometry m_Odometry;
   public void ArcadeDrive (double Ydisplacement, double rotation) {
     leftMaster.set(Ydisplacement + rotation);
     rightMaster.set(Ydisplacement - rotation);
+
+    Log();
   }
 
   
@@ -159,7 +161,12 @@ m_drive.setMaxOutput(maxOutput);
   public void setHighGear (){
     leftLevelShifter.set(DoubleSolenoid.Value.kForward);
     rightLevelShifter.set(DoubleSolenoid.Value.kForward);
+
   }*/
+
+  public void Log(){
+    SmartDashboard.putNumber("Gyro", getHeading());
+  }
 
   public LimeLight getlimelight(){
     return m_limelight;
