@@ -48,7 +48,7 @@ private CANEncoder rightEncoder = new CANEncoder(rightMaster);
 
 public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics (Units.inchesToMeters(26.75));
 
-Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS2);
 
 private DifferentialDriveOdometry m_Odometry;
   /**
@@ -58,8 +58,8 @@ private DifferentialDriveOdometry m_Odometry;
     leftSlave.follow(leftMaster);
     rightSlave.follow(rightMaster);
 
-    leftMaster.setInverted(false);
-    rightMaster.setInverted(true);
+    leftMaster.setInverted(true);
+    rightMaster.setInverted(false);
 
     leftEncoder.setPositionConversionFactor(Constants.DGWheelCircMeters/DriveConstants.DriveGearHighReduction);
     rightEncoder.setPositionConversionFactor(Constants.DGWheelCircMeters/DriveConstants.DriveGearHighReduction);
@@ -72,7 +72,9 @@ private DifferentialDriveOdometry m_Odometry;
 
   @Override
   public void periodic() {
-    Log();
+    SmartDashboard.putNumber("Gyro", getHeading());
+    SmartDashboard.putBoolean("isGyroConnected", gyro.isConnected());
+    
     m_Odometry.update(Rotation2d.fromDegrees(getHeading()), leftEncoder.getPosition(), rightEncoder.getPosition());
     // This method will be called once per scheduler run
   }
@@ -114,7 +116,7 @@ private DifferentialDriveOdometry m_Odometry;
     leftMaster.set(Ydisplacement + rotation);
     rightMaster.set(Ydisplacement - rotation);
 
-    Log();
+    
   }
 
   
@@ -146,7 +148,8 @@ m_drive.setMaxOutput(maxOutput);
   }
 
   public double getHeading() {
-    return Math.IEEEremainder(gyro.getAngle(), 360) * (Constants.kGyroReversed ? -1.0 : 1.0);
+   // return Math.IEEEremainder(gyro.getAngle(), 360) * (Constants.kGyroReversed ? -1.0 : 1.0);
+   return gyro.getAngle();
   }
 
   public double getTurnRate() {
