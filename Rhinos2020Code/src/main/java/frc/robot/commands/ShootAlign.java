@@ -8,18 +8,16 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.limelightvision.LimeLight;
 import frc.robot.subsystems.DriveTrain;
 
 public class ShootAlign extends CommandBase {
-  private static final double THRESHOLD = 0;
+  private static final double THRESHOLD = 1;
 double steeringadjust;
-  double threshold;
+  double threshold = 0.2;
   /**
    * Creates a new ShootAlign.
    */
+
   DriveTrain m_DriveTrain = new DriveTrain();
 
   public ShootAlign(DriveTrain D) {
@@ -36,7 +34,9 @@ m_DriveTrain = D;
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double Kp = Constants.Drive_kP;
+    
+    m_DriveTrain.Log();
+    double Kp = 0.01;
     double tx = m_DriveTrain.getlimelight().getdegRotationToTarget();
     boolean isTargetSeen = m_DriveTrain.getlimelight().getIsTargetFound();
     double error = -tx;
@@ -50,8 +50,8 @@ m_DriveTrain = D;
       steeringadjust = Kp * error + threshold;
     }
     m_DriveTrain.tankDriveSimpleTeleop(
-      steeringadjust, 
-      -steeringadjust);
+      -steeringadjust*.15, 
+      steeringadjust*.15);
     
   }
 
@@ -66,6 +66,6 @@ m_DriveTrain = D;
     if (Math.abs(m_DriveTrain.getlimelight().getdegRotationToTarget()) < THRESHOLD) {
       return true;
     } 
-    else return false;
+    else{return false;} 
   }
 }

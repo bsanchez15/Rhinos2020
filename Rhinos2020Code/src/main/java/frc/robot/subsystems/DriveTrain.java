@@ -1,110 +1,109 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2019 FIRST. All Rights Reserved.                             */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-
 package frc.robot.subsystems;
 
-import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.SlewRateLimiter;
+import edu.wpi.first.wpilibj.controller.PIDController;
+import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.limelightvision.LimeLight;
 
 public class DriveTrain extends SubsystemBase {
-  private LimeLight m_limelight;
 
- 
-  //private DoubleSolenoid leftLevelShifter = new DoubleSolenoid(DriveConstants.DriveLeftShifter1ID, DriveConstants.DriveleftShifter2ID);
-  //private DoubleSolenoid rightLevelShifter = new DoubleSolenoid(DriveConstants.DriveLeftShifter1ID, DriveConstants.DriveleftShifter2ID);
+  LimeLight m_LimeLight = new LimeLight();
 
- private CANSparkMax leftMaster = new CANSparkMax(DriveConstants.lMasterID,MotorType.kBrushless);
- private CANSparkMax rightMaster = new CANSparkMax(DriveConstants.RMasterID,MotorType.kBrushless);
+  private static final double kGearRatio = 7.29;
+  private static final double kWheelRadiusInches = 3.0;
 
-private CANSparkMax leftSlave = new CANSparkMax(DriveConstants.lSlaveID, MotorType.kBrushless);
-private CANSparkMax rightSlave = new CANSparkMax(DriveConstants.rSlaveID, MotorType.kBrushless);
+  CANSparkMax leftMaster = new CANSparkMax(DriveConstants.lMasterID, CANSparkMaxLowLevel.MotorType.kBrushless);
+  CANSparkMax rightMaster = new CANSparkMax(DriveConstants.RMasterID, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-private DifferentialDrive m_drive = new DifferentialDrive(leftMaster, rightMaster);
+  CANSparkMax leftSlave = new CANSparkMax(DriveConstants.lSlaveID, CANSparkMaxLowLevel.MotorType.kBrushless);
+  CANSparkMax rightSlave = new CANSparkMax(DriveConstants.rSlaveID, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-private CANEncoder leftEncoder = new CANEncoder(leftMaster);
-private CANEncoder rightEncoder = new CANEncoder(rightMaster);
+  ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 
-public static final DifferentialDriveKinematics kDriveKinematics = new DifferentialDriveKinematics (Units.inchesToMeters(26.75));
+  DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Units.inchesToMeters(28));
+  DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(getHeading());
 
-ADXRS450_Gyro gyro = new ADXRS450_Gyro(SPI.Port.kOnboardCS2);
+  SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(0.3, 1.96, 0.06);
 
-private DifferentialDriveOdometry m_Odometry;
-  /**
-   * Creates a new DriveTrain.
-   */
+  PIDController leftPIDController = new PIDController(2.95, 0, 0);
+  PIDController rightPIDController = new PIDController(2.95, 0, 0);
+
+  Pose2d pose = new Pose2d();
   public DriveTrain() {
     leftSlave.follow(leftMaster);
     rightSlave.follow(rightMaster);
 
-    leftMaster.setInverted(true);
-    rightMaster.setInverted(false);
+    leftMaster.setInverted(false);
+    rightMaster.setInverted(true);
 
-    leftEncoder.setPositionConversionFactor(Constants.DGWheelCircMeters/DriveConstants.DriveGearHighReduction);
-    rightEncoder.setPositionConversionFactor(Constants.DGWheelCircMeters/DriveConstants.DriveGearHighReduction);
-
-    m_Odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
+    gyro.reset();
   }
 
-
-  
-
-  @Override
-  public void periodic() {
-    SmartDashboard.putNumber("Gyro", getHeading());
-    SmartDashboard.putBoolean("isGyroConnected", gyro.isConnected());
-    
-    m_Odometry.update(Rotation2d.fromDegrees(getHeading()), leftEncoder.getPosition(), rightEncoder.getPosition());
-    // This method will be called once per scheduler run
+  public Rotation2d getHeading() {
+    return Rotation2d.fromDegrees(-gyro.getAngle());
   }
 
-  public Pose2d getPose () {
-    return m_Odometry.getPoseMeters();
-  }
-  public DifferentialDriveWheelSpeeds getSpeeds(){
+  public DifferentialDriveWheelSpeeds getSpeeds() {
     return new DifferentialDriveWheelSpeeds(
-    leftMaster.getEncoder().getVelocity()/DriveConstants.DriveGearHighReduction*Constants.DGWheelCircInches ,
-    rightMaster.getEncoder().getVelocity()/DriveConstants.DriveGearHighReduction*Constants.DGWheelCircInches
+        leftMaster.getEncoder().getVelocity() / kGearRatio * 2 * Math.PI * Units.inchesToMeters(kWheelRadiusInches) / 60,
+        rightMaster.getEncoder().getVelocity() / kGearRatio * 2 * Math.PI * Units.inchesToMeters(kWheelRadiusInches) / 60
     );
   }
 
-
-
-  public void resetOdometry(Pose2d pose){
-    resetEncoders();
-    m_Odometry.resetPosition(pose, Rotation2d.fromDegrees(getHeading()));
-
+  public DifferentialDriveKinematics getKinematics() {
+    return kinematics;
   }
 
-  public void tankDriveVolts (double leftVolts, double rightVolts){
-    leftMaster.setVoltage(leftVolts);
-    rightMaster.setVoltage(rightVolts);
+  public Pose2d getPose() {
+    return pose;
   }
+
+  public SimpleMotorFeedforward getFeedforward() {
+    return feedforward;
+  }
+
+  public PIDController getLeftPIDController() {
+    return leftPIDController;
+  }
+
+  public PIDController getRightPIDController() {
+    return rightPIDController;
+  }
+
+  public void setOutputVolts(double leftVolts, double rightVolts) {
+    leftMaster.set(leftVolts / 12);
+    rightMaster.set(rightVolts / 12);
+  }
+
+  public void reset() {
+    odometry.resetPosition(new Pose2d(), getHeading());
+  }
+
+  @Override
+  public void periodic() {
+    pose = odometry.update(getHeading(), leftMaster.getEncoder().getPosition(), rightMaster.getEncoder().getPosition() );
+  }
+
 
   public void tankDriveSimpleTeleop(double leftOutput, Double rightOutput){
-    leftMaster.set(leftOutput*leftOutput*leftOutput);
-    rightMaster.set(rightOutput*rightOutput*rightOutput);
+
+
+    leftMaster.set((leftOutput));
+    rightMaster.set((rightOutput));
   }
 
   public void GTADrive (double rotation, double forward, double reverse){
@@ -119,42 +118,11 @@ private DifferentialDriveOdometry m_Odometry;
     
   }
 
+//  public double getHeading() {
+//    return Math.IEEEremainder(gyro.getAngle(), 360) * (Constants.kGyroReversed ? -1.0 : 1.0);
   
-    
-  public void resetEncoders(){
-    leftEncoder.setPosition(0);
-    rightEncoder.setPosition(0);
+//  }
 
-  }
-
-  public double getAverageEncoderDistance() {
-    return (leftEncoder.getPosition() + rightEncoder.getPosition()) / 2.0;
-  }
-
-  public CANEncoder getLeftEncoder(){
-    return leftEncoder;
-  }
-
-  public CANEncoder getRightEncoder(){
-    return rightEncoder;
-  }   
-
-  public void setMaxOutput(double maxOutput){
-m_drive.setMaxOutput(maxOutput);
-  }
-
-  public void zeroHeading() {
-    gyro.reset();
-  }
-
-  public double getHeading() {
-   // return Math.IEEEremainder(gyro.getAngle(), 360) * (Constants.kGyroReversed ? -1.0 : 1.0);
-   return gyro.getAngle();
-  }
-
-  public double getTurnRate() {
-    return gyro.getRate() * (Constants.kGyroReversed ? -1.0 : 1.0);
-  }
 
 /*  public void setLowGear (){
     leftLevelShifter.set(DoubleSolenoid.Value.kReverse);
@@ -166,13 +134,16 @@ m_drive.setMaxOutput(maxOutput);
     rightLevelShifter.set(DoubleSolenoid.Value.kForward);
 
   }*/
+  public void Log (){
+    SmartDashboard.putNumber("tx", m_LimeLight.getdegRotationToTarget());
+    SmartDashboard.putNumber("ty", m_LimeLight.getdegVerticalToTarget());
+    SmartDashboard.putBoolean("TargetSeen", m_LimeLight.getIsTargetFound());
 
-  public void Log(){
-    SmartDashboard.putNumber("Gyro", getHeading());
   }
 
+
   public LimeLight getlimelight(){
-    return m_limelight;
+    return m_LimeLight;
     
       }
   

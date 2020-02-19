@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.XboxController.Button;
@@ -45,23 +46,25 @@ import frc.robot.subsystems.Shooter;
  * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  SlewRateLimiter leftLimiter = new SlewRateLimiter(0.5);
+  SlewRateLimiter rightLimiter = new SlewRateLimiter(0.5);
   // The robot's subsystems and commands are defined here...
   XboxController controller1 = new XboxController(Constants.Controller1ID);
-  private final DriveTrain m_robotDrive = new DriveTrain();
+  private final DriveTrain Drive = new DriveTrain();
   private final Shooter m_Shooter = new Shooter();
   //private final Intake m_Intake = new Intake();
 
   private final ShootRange m_ShootRange = new ShootRange(m_Shooter);
-  private final ShootAlign m_ShootAlign = new ShootAlign(m_robotDrive);
+  private final ShootAlign m_ShootAlign = new ShootAlign(Drive);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
     
-    m_robotDrive.setDefaultCommand(new RunCommand(()-> 
+    Drive.setDefaultCommand(new RunCommand(()-> 
     
-    m_robotDrive.ArcadeDrive(controller1.getRawAxis(Constants.Controller1LeftY)*.4,controller1.getRawAxis(Constants.Controller1RightX)*.4),m_robotDrive));
+    Drive.ArcadeDrive(leftLimiter.calculate(controller1.getRawAxis(Constants.Controller1LeftY)*.4) ,rightLimiter.calculate(controller1.getRawAxis(Constants.Controller1RightX)*.4)),Drive));
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -78,7 +81,7 @@ public class RobotContainer {
     new JoystickButton(controller1, Button.kB.value)
         .whenPressed(new InstantCommand(() -> m_Intake.setShifterReverse()));
 */
-    new JoystickButton(controller1, Button.kY.value).whenPressed(m_ShootRange);
+    //new JoystickButton(controller1, Button.kY.value).whenPressed(m_ShootRange);
   
     new JoystickButton(controller1, Button.kX.value).whenPressed(m_ShootAlign);
 }
@@ -114,19 +117,17 @@ public class RobotContainer {
     if (trajectory1 != null){
     RamseteCommand ramseteCommandFirstRoute = new RamseteCommand(
         trajectory1,
-        m_robotDrive::getPose,
-        new RamseteController(Constants.kRamseteB, Constants.kRamseteZeta),
-        new SimpleMotorFeedforward(Constants.Drive_ksVolts,
-                                   Constants.Drive_kvVoltsSecondPerMeter,
-                                   Constants.kaVoltSecondsSquaredPerMeter),
-        DriveConstants.kDriveKinematics,
-        m_robotDrive::getSpeeds,
-        new PIDController(Constants.Drive_kP, 0, 0), new PIDController(Constants.Drive_kP, 0, 0),
-        // RamseteCommand passes volts to the callback
-        m_robotDrive::tankDriveVolts,
-        m_robotDrive
+        Drive::getPose,
+        new RamseteController(2, .7),
+        Drive.getFeedforward(),
+        Drive.getKinematics(),
+        Drive::getSpeeds,
+        Drive.getLeftPIDController(),
+        Drive.getRightPIDController(),
+        Drive::setOutputVolts,
+        Drive
     );
-    return ramseteCommandFirstRoute.andThen(() -> m_robotDrive.tankDriveVolts(0, 0));
+    return ramseteCommandFirstRoute.andThen(() -> Drive.setOutputVolts(0, 0));
     } else {
       return null;
     

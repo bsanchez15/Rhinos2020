@@ -15,7 +15,7 @@ import frc.robot.subsystems.Shooter;
 
 public class ShootRange extends CommandBase {
   Shooter m_shooter;
-  MedianFilter tyfilter = new MedianFilter(5);
+  MedianFilter tyfilter = new MedianFilter(10);
   /**
    * Creates a new ShootRange.
    */
@@ -38,7 +38,7 @@ public class ShootRange extends CommandBase {
     double ty = m_shooter.getlimelight().getdegVerticalToTarget();
 
     SmartDashboard.putNumber("Distance", DistanceCalc(ty)); 
-    SmartDashboard.putNumber("Output", OutputCalc()); 
+    SmartDashboard.putNumber("Output", OutputCalc());   
   }
 
   // Called once the command ends or is interrupted.
