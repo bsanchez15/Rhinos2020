@@ -4,8 +4,10 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
@@ -25,6 +27,10 @@ public class DriveTrain extends SubsystemBase {
 
   private static final double kGearRatio = 7.29;
   private static final double kWheelRadiusInches = 3.0;
+
+DoubleSolenoid leftLevelShifter = new DoubleSolenoid(DriveConstants.leftDriveShifter1ID, DriveConstants.leftDriveShifter2ID);
+DoubleSolenoid rightLevelShifter = new DoubleSolenoid(DriveConstants.rightDriveShifter1ID, DriveConstants.rightDriveShifter2ID);
+
 
   CANSparkMax leftMaster = new CANSparkMax(DriveConstants.lMasterID, CANSparkMaxLowLevel.MotorType.kBrushless);
   CANSparkMax rightMaster = new CANSparkMax(DriveConstants.RMasterID, CANSparkMaxLowLevel.MotorType.kBrushless);
@@ -124,20 +130,21 @@ public class DriveTrain extends SubsystemBase {
 //  }
 
 
-/*  public void setLowGear (){
-    leftLevelShifter.set(DoubleSolenoid.Value.kReverse);
-    rightLevelShifter.set(DoubleSolenoid.Value.kReverse);
+  public void setLowGear (){
+    leftLevelShifter.set(Value.kReverse);
+    rightLevelShifter.set(Value.kReverse);
   }
 
   public void setHighGear (){
-    leftLevelShifter.set(DoubleSolenoid.Value.kForward);
-    rightLevelShifter.set(DoubleSolenoid.Value.kForward);
+    leftLevelShifter.set(Value.kForward);
+    rightLevelShifter.set(Value.kForward);
 
-  }*/
+  }
   public void Log (){
     SmartDashboard.putNumber("tx", m_LimeLight.getdegRotationToTarget());
     SmartDashboard.putNumber("ty", m_LimeLight.getdegVerticalToTarget());
     SmartDashboard.putBoolean("TargetSeen", m_LimeLight.getIsTargetFound());
+    SmartDashboard.putNumber(	"getHeading", gyro.getAngle());
 
   }
 

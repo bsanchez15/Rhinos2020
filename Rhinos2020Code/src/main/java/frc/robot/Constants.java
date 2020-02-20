@@ -29,8 +29,13 @@ public static final int Controller1LeftX = 0;
 
 	public static final int ShooterFW1_ID = 1;
 	public static final int ShooterFW2_ID = 2;
+
+	public static final int Climber1_ID = 6;
+
 	
 	public static final int Controller1ID = 1;
+
+
 
 
 //Field/Robot Dimensions
@@ -74,20 +79,25 @@ public static final int Controller1LeftX = 0;
 		public static final int RMasterID = 3;
 		public static final int lSlaveID = 2;
 		public static final int rSlaveID = 4;
-		public static final int DriveLeftShifter1ID = 0;
-		public static final int DriveleftShifter2ID = 0;
+
 
 
 		public static final double DriveGearLowReduction = 1/7.29;
 		public static final double DriveGearHighReduction = 1/15;
+
+
+		public static final int leftDriveShifter1ID = 6;
+		public static final int leftDriveShifter2ID = 7;
+		public static final int rightDriveShifter1ID = 0;
+		public static final int rightDriveShifter2ID = 1;
 	}
 
 	public static final class IntakeConstants {
-		public static final int Intake_Shifter2_1 = 0;
+	/*	public static final int Intake_Shifter2_1 = 0;
 		public static final int Intake_Shifter2_2 = 0;
 
 		public static final int Intake_Shifter1_1 = 0;
-		public static final int Intake_Shifter1_2 = 1;
+		public static final int Intake_Shifter1_2 = 1; */
 		public static final int Intake1_ID = 9;
 		public static final int Intake2_ID = 10;
 	}

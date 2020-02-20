@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.RamseteController;
@@ -46,6 +45,7 @@ import frc.robot.subsystems.Shooter;
  * commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+ 
   SlewRateLimiter leftLimiter = new SlewRateLimiter(0.5);
   SlewRateLimiter rightLimiter = new SlewRateLimiter(0.5);
   // The robot's subsystems and commands are defined here...
@@ -76,11 +76,11 @@ public class RobotContainer {
    * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
- /*   new JoystickButton(controller1, Button.kA.value)
-        .whenPressed(new InstantCommand(() -> m_Intake.setShifterForward()));
+    new JoystickButton(controller1, Button.kA.value)
+        .whenPressed(new RunCommand(() -> Drive.setHighGear(), Drive));
     new JoystickButton(controller1, Button.kB.value)
-        .whenPressed(new InstantCommand(() -> m_Intake.setShifterReverse()));
-*/
+        .whenPressed(new RunCommand(() -> Drive.setLowGear(), Drive));
+
     //new JoystickButton(controller1, Button.kY.value).whenPressed(m_ShootRange);
   
     new JoystickButton(controller1, Button.kX.value).whenPressed(m_ShootAlign);
