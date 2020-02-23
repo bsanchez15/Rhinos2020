@@ -18,7 +18,7 @@ double steeringadjust;
    * Creates a new ShootAlign.
    */
 
-  DriveTrain m_DriveTrain = new DriveTrain();
+  DriveTrain m_DriveTrain;
 
   public ShootAlign(DriveTrain D) {
 m_DriveTrain = D;
@@ -35,7 +35,7 @@ m_DriveTrain = D;
   @Override
   public void execute() {
     
-    m_DriveTrain.Log();
+  //  m_DriveTrain.Log();
     double Kp = 0.01;
     double tx = m_DriveTrain.getlimelight().getdegRotationToTarget();
     boolean isTargetSeen = m_DriveTrain.getlimelight().getIsTargetFound();

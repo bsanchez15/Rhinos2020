@@ -27,13 +27,14 @@ public static final int Controller1LeftY = 1;
 public static final int Controller1LeftX = 0;
 
 
-	public static final int ShooterFW1_ID = 1;
-	public static final int ShooterFW2_ID = 2;
+	public static final int ShooterFW1_ID = 7;
+	public static final int ShooterFW2_ID = 8;
 
 	public static final int Climber1_ID = 6;
 
 	
 	public static final int Controller1ID = 1;
+	public static final int Controller2ID = 2;
 
 
 
@@ -45,12 +46,12 @@ public static final int Controller1LeftX = 0;
 
 
 //Functions
-	public static final int DvsV_FirstTerm = 0;
+	public static final int DvsV_FirstTerm = 40;
 	public static final int DvsV_SecondTerm = 0;
 
 //Gains
-	public static final double Shooter_ks = 0.0183; 
-	public static final double Shooter_kv= 0.121;
+	public static final double Shooter_ks = 0.122; 
+	public static final double Shooter_kv= 0.125;
 	
 	public static final double Drive_ksVolts = 0.039;
 	public static final double Drive_kvVoltsSecondPerMeter = 2.01;
@@ -68,6 +69,10 @@ public static final int Controller1LeftX = 0;
 	public static final double DriveMaxVelocity = 0;
 	public static final double DriveMaxAcceleration = 0;
 	public static final double kaVoltSecondsSquaredPerMeter = 0;
+	public static final int Controller2RightTriggerID = 3;
+	public static final int Controller2LeftTrigger = 2;
+	public static final int Controller2LeftY = 1;
+	public static final int Controller2RightY = 5;
 
 
 
@@ -88,18 +93,27 @@ public static final int Controller1LeftX = 0;
 
 		public static final int leftDriveShifter1ID = 6;
 		public static final int leftDriveShifter2ID = 7;
-		public static final int rightDriveShifter1ID = 0;
-		public static final int rightDriveShifter2ID = 1;
+		public static final int rightDriveShifter1ID = 5;
+		public static final int rightDriveShifter2ID = 4;
 	}
 
 	public static final class IntakeConstants {
-	/*	public static final int Intake_Shifter2_1 = 0;
-		public static final int Intake_Shifter2_2 = 0;
+		public static final int Intake_Shifter2_1 = 3;
+		public static final int Intake_Shifter2_2 = 2;
 
 		public static final int Intake_Shifter1_1 = 0;
-		public static final int Intake_Shifter1_2 = 1; */
+		public static final int Intake_Shifter1_2 = 1; 
 		public static final int Intake1_ID = 9;
 		public static final int Intake2_ID = 10;
+	}
+
+	public static final class FunnelConstants {
+
+		 ;
+		public static final int Funnel1_ID = 11;
+		public static final int Funnel2_ID = 12;
+
+
 	}
 
 }

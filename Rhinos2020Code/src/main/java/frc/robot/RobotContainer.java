@@ -29,11 +29,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.ShootAlign;
 import frc.robot.commands.ShootRange;
+import frc.robot.commands.TestShoot;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Funnel;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 
@@ -50,23 +54,45 @@ public class RobotContainer {
   SlewRateLimiter rightLimiter = new SlewRateLimiter(0.5);
   // The robot's subsystems and commands are defined here...
   XboxController controller1 = new XboxController(Constants.Controller1ID);
-  private final DriveTrain Drive = new DriveTrain();
+  XboxController controller2 = new XboxController(Constants.Controller2ID);
+  private final DriveTrain m_Drive = new DriveTrain();
   private final Shooter m_Shooter = new Shooter();
-  //private final Intake m_Intake = new Intake();
+  private final Intake m_Intake = new Intake();
+  private final Funnel m_Funnel = new Funnel();
+  private final Climber m_Climber = new Climber();
 
   private final ShootRange m_ShootRange = new ShootRange(m_Shooter);
-  private final ShootAlign m_ShootAlign = new ShootAlign(Drive);
+  private final ShootAlign m_ShootAlign = new ShootAlign(m_Drive);
+  private final TestShoot m_TestShoot = new TestShoot(m_Shooter);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    
-    Drive.setDefaultCommand(new RunCommand(()-> 
-    
-    Drive.ArcadeDrive(leftLimiter.calculate(controller1.getRawAxis(Constants.Controller1LeftY)*.4) ,rightLimiter.calculate(controller1.getRawAxis(Constants.Controller1RightX)*.4)),Drive));
+
+
+   /* m_Intake.setDefaultCommand(new RunCommand(()-> 
+    m_Intake.setIntakeOutput((controller2.getRawAxis(Constants.Controller2RightTriggerID)-(controller2.getRawAxis(Constants.Controller2LeftTrigger)))), m_Intake));
+    ;*/
+    //Default Commands
+    m_Drive.setDefaultCommand(new RunCommand(()-> 
+    m_Drive.ArcadeDrive(leftLimiter.calculate(controller1.getRawAxis(Constants.Controller1LeftY)*.4) ,rightLimiter.calculate(controller1.getRawAxis(Constants.Controller1RightX)*.4)),m_Drive));
     // Configure the button bindings
+ 
+
+    m_Funnel.setDefaultCommand(new RunCommand(()-> 
+    m_Funnel.setOutput(controller2.getRawAxis(Constants.Controller2LeftY)), m_Funnel));
+
     configureButtonBindings();
+
+    m_Climber.setDefaultCommand(new RunCommand(()-> 
+    m_Climber.setClimberOutput(controller2.getRawAxis(Constants.Controller2RightY)), m_Climber));
+
+    ;
+
+  
+
+
   }
 
   /**
@@ -76,14 +102,23 @@ public class RobotContainer {
    * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    new JoystickButton(controller1, Button.kA.value)
-        .whenPressed(new RunCommand(() -> Drive.setHighGear(), Drive));
-    new JoystickButton(controller1, Button.kB.value)
-        .whenPressed(new RunCommand(() -> Drive.setLowGear(), Drive));
 
-    //new JoystickButton(controller1, Button.kY.value).whenPressed(m_ShootRange);
-  
-    new JoystickButton(controller1, Button.kX.value).whenPressed(m_ShootAlign);
+    //Solenoid bindings
+    new JoystickButton(controller2, Button.kA.value)
+    .whenPressed(new RunCommand(() -> m_Intake.setShifterForward(), m_Intake));
+new JoystickButton(controller2, Button.kB.value)
+    .whenPressed(new RunCommand(() -> m_Intake.setShifterReverse(), m_Intake));
+    
+
+    new JoystickButton(controller1, Button.kA.value)
+        .whenPressed(new RunCommand(() -> m_Drive.setHighGear(), m_Drive));
+    new JoystickButton(controller1, Button.kB.value)
+        .whenPressed(new RunCommand(() -> m_Drive.setLowGear(), m_Drive));
+
+        //Limelight Commands bindings
+
+    new JoystickButton(controller1, Button.kY.value).whenPressed(m_ShootRange);
+    new JoystickButton(controller1, Button.kX.value).whileHeld(m_ShootAlign);
 }
     
 
@@ -111,25 +146,39 @@ public class RobotContainer {
       trajectory1 = TrajectoryUtil.fromPathweaverJson(Paths.get("/home/lvuser/deploy/paths/SimpleTurn.wpilib.json"));
     }
     catch (IOException ioe) { 
-      DriverStation.reportError("Unable to open trajectory!", ioe.getStackTrace());
+      DriverStation.reportError("Unable to open trajectory1!", ioe.getStackTrace());
     }
 
     if (trajectory1 != null){
     RamseteCommand ramseteCommandFirstRoute = new RamseteCommand(
         trajectory1,
-        Drive::getPose,
+        m_Drive::getPose,
         new RamseteController(2, .7),
-        Drive.getFeedforward(),
-        Drive.getKinematics(),
-        Drive::getSpeeds,
-        Drive.getLeftPIDController(),
-        Drive.getRightPIDController(),
-        Drive::setOutputVolts,
-        Drive
+        m_Drive.getFeedforward(),
+        m_Drive.getKinematics(),
+        m_Drive::getSpeeds,
+        m_Drive.getLeftPIDController(),
+        m_Drive.getRightPIDController(),
+        m_Drive::setOutputVolts,
+        m_Drive
     );
-    return ramseteCommandFirstRoute.andThen(() -> Drive.setOutputVolts(0, 0));
+
+   // Trajectory trajectory2 = null;
+
+   /* try {
+      trajectory2 = TrajectoryUtil.fromPathweaverJson(Paths.get("/home/lvuser/deploy/paths/SimpleTurn.wpilib.json"));
+    }
+    catch (IOException ioe) { 
+      DriverStation.reportError("Unable to open trajectory2!", ioe.getStackTrace());
+    }*/
+
+
+    return new SequentialCommandGroup(ramseteCommandFirstRoute, m_ShootAlign );
+    //return ramseteCommandFirstRoute.andThen(() -> m_Drive.setOutputVolts(0, 0));
     } else {
       return null;
+
+    
     
   }
     

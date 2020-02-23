@@ -21,7 +21,7 @@ import frc.robot.limelightvision.LimeLight;
 public class Shooter extends PIDSubsystem {
   CANSparkMax flywheel1 = new CANSparkMax(Constants.ShooterFW1_ID, MotorType.kBrushless);
   CANSparkMax flywheel2 = new CANSparkMax(Constants.ShooterFW2_ID, MotorType.kBrushless);
-  CANEncoder encoder = new CANEncoder(flywheel1);
+
 
   SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.Shooter_ks, Constants.Shooter_kv);
 
@@ -35,7 +35,7 @@ public class Shooter extends PIDSubsystem {
     
     super(
         // The PIDController used by the subsystem
-        new PIDController(0, 0, 0));
+        new PIDController(0.923, 0, 0));
   }
 
   @Override
@@ -50,19 +50,16 @@ public class Shooter extends PIDSubsystem {
     return 0;
   }
 
-  public double GetShooterSpeed () {
-    return encoder.getVelocity()/60;
-  }
+
 
   public LimeLight getlimelight(){
 return m_limelight;
 
   }
 
-  public void log() {
-    SmartDashboard.putBoolean("TargetFound[tv]", getlimelight().getIsTargetFound());
+  /*public void log() {
     SmartDashboard.putNumber("GetDegVertical[ty]", getlimelight().getdegVerticalToTarget());
     SmartDashboard.putNumber("GetDegHorizontal[tx]", getlimelight().getdegRotationToTarget());
-    SmartDashboard.putNumber(("GetShooterSpeed"), GetShooterSpeed() );
-  }
+
+  }*/
 }

@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
-//  private DoubleSolenoid intakePiston1 = new DoubleSolenoid(IntakeConstants.Intake_Shifter1_1, IntakeConstants.Intake_Shifter1_2);
-//  private DoubleSolenoid intakePiston2 = new DoubleSolenoid(IntakeConstants.Intake_Shifter2_1, IntakeConstants.Intake_Shifter2_2);
+  private DoubleSolenoid intakePiston1 = new DoubleSolenoid(IntakeConstants.Intake_Shifter1_1, IntakeConstants.Intake_Shifter1_2);
+  private DoubleSolenoid intakePiston2 = new DoubleSolenoid(IntakeConstants.Intake_Shifter2_1, IntakeConstants.Intake_Shifter2_2);
 
   private CANSparkMax intake1 = new CANSparkMax(IntakeConstants.Intake1_ID, MotorType.kBrushed);
   private CANSparkMax intake2 = new CANSparkMax(IntakeConstants.Intake2_ID, MotorType.kBrushed);
@@ -35,10 +35,12 @@ public class Intake extends SubsystemBase {
     intake1.setIdleMode(IdleMode.kCoast);
     intake2.setIdleMode(IdleMode.kCoast);
 
+    intake2.follow(intake1);
+
 
   }
 
-  /*public void setShifterForward() {
+  public void setShifterForward() {
 intakePiston1.set(Value.kForward);
 intakePiston2.set(Value.kForward);
 
@@ -47,11 +49,11 @@ intakePiston2.set(Value.kForward);
     intakePiston1.set(Value.kReverse);
     intakePiston2.set(Value.kReverse);
 
-      }*/
+      }
 
   public void setIntakeOutput (double power){
-    intake1.set(power);
-    intake2.set(power);
+    intake1.set(power*.3);
+    intake2.set(power*-.3);
   }
     
   @Override

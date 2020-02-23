@@ -35,7 +35,7 @@ public class TestShoot extends CommandBase {
   @Override
   public void execute() {
     double Output = 0;
-    m_shooter.log();
+   // m_shooter.log();
     m_shooter.useOutput(0, Output);
     double ty = m_shooter.getlimelight().getdegVerticalToTarget();
 

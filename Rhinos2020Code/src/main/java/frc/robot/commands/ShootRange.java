@@ -33,7 +33,7 @@ public class ShootRange extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_shooter.log();
+    //m_shooter.log();
     m_shooter.useOutput(0, OutputCalc());
     double ty = m_shooter.getlimelight().getdegVerticalToTarget();
 

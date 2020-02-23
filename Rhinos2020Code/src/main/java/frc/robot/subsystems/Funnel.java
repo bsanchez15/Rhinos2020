@@ -11,23 +11,22 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.FunnelConstants;
 
-public class Climber extends SubsystemBase {
-  private CANSparkMax climber1 = new CANSparkMax(Constants.Climber1_ID, MotorType.kBrushless);
-  private CANSparkMax climber2 = new CANSparkMax(Constants.Climber1_ID, MotorType.kBrushless);
-
+public class Funnel extends SubsystemBase {
+  private CANSparkMax Funnel1 = new CANSparkMax(FunnelConstants.Funnel1_ID, MotorType.kBrushed);
+  private CANSparkMax Funnel2 = new CANSparkMax(FunnelConstants.Funnel2_ID, MotorType.kBrushed);
   /**
-   * Creates a new Climber.
+   * Creates a new Funnel.
    */
-  public Climber() {
-    climber2.follow(climber1, true);
+  public Funnel() {
+
 
   }
 
-  public void setClimberOutput(double power){
-    climber1.set(power*.5);
-    
+  public void setOutput(double speed ) {
+    Funnel2.set(speed*.7);
+    Funnel1.set(speed*.7);
 
   }
 
